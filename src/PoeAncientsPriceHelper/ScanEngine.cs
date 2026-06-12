@@ -343,10 +343,8 @@ internal sealed class ScanEngine : IDisposable
     }
 
     // Minimum character-similarity (1 - editDistance/maxLen) for a fuzzy price match.
-    // 0.70 for Chinese support (more lenient due to OCR variations with Chinese characters)
-    // 0.84 lets ~2 wrong characters through on a 12+ char name, 1 on a ~6 char name —
-    // enough to absorb typical OCR slips without matching an unrelated item.
-    private const double FuzzyThreshold = 0.70;
+    // 0.60 for Chinese support (更宽松，处理OCR识别错误)
+    private const double FuzzyThreshold = 0.60;
 
     // Closest price key to an OCR'd name by Levenshtein similarity, or null if nothing clears
     // FuzzyThreshold. Only candidates within ±5 of the name's length are considered (cheaper,

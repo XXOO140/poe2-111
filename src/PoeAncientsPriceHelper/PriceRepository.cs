@@ -444,6 +444,8 @@ internal sealed class PriceRepository : IDisposable
             s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf])\s+([\u4e00-\u9fff\u3400-\u4dbf])", "$1$2");
         } while (s != prev);
         s = Regex.Replace(s, @"\s+", " ");
+        // 去除中文末尾的单个字符噪声
+        s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf]{2,})[\u4e00-\u9fff\u3400-\u4dbf]$", "$1");
         return s.Trim();
     }
 
