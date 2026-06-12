@@ -8,7 +8,7 @@ import os
 import sys
 import json
 
-# 设置环境变量，减少 PaddleOCR 的日志输出
+# 设置环境变量
 os.environ['GLOG_minloglevel'] = '2'
 os.environ['FLAGS_minloglevel'] = '2'
 os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
@@ -17,17 +17,12 @@ def setup_paddleocr():
     """初始化 PaddleOCR"""
     try:
         from paddleocr import PaddleOCR
-        ocr = PaddleOCR(
-            use_textline_orientation=True,
-            lang='ch',
-            show_log=False,
-            use_gpu=False
-        )
+        ocr = PaddleOCR(lang='ch')
         return ocr
     except Exception as e:
         print(json.dumps({
             'success': False,
-            'error': f'初始化 PaddleOCR 失败: {str(e)}',
+            'error': '初始化 PaddleOCR 失败: ' + str(e),
             'items': []
         }))
         sys.exit(1)
@@ -38,7 +33,7 @@ def recognize_image(ocr, image_path):
         if not os.path.exists(image_path):
             return {
                 'success': False,
-                'error': f'文件不存在: {image_path}',
+                'error': '文件不存在: ' + image_path,
                 'items': []
             }
         
@@ -50,7 +45,7 @@ def recognize_image(ocr, image_path):
                 'items': []
             }
         
-        result = ocr.ocr(image_path, cls=True)
+        result = ocr.ocr(image_path)
         
         items = []
         if result and len(result) > 0:
@@ -84,7 +79,7 @@ def recognize_image(ocr, image_path):
         import traceback
         return {
             'success': False,
-            'error': f'{str(e)}\n{traceback.format_exc()}',
+            'error': str(e) + '\n' + traceback.format_exc(),
             'items': []
         }
 

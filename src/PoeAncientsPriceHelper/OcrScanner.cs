@@ -70,14 +70,14 @@ internal sealed class OcrScanner : IDisposable
         byte[] png = ToPng(upscaled);
         int height = regionBitmap.Height;
 
-        // 如果启用 RapidOCR，使用原图（不反转）
+        // 如果启用 RapidOCR，使用完整图片（不裁剪，不反转）
         if (_useRapidOcr && _rapidOcr != null && _rapidOcr.IsAvailable)
         {
-            using var originalUpscaled = Upscale(cropped, UpscaleFactor);
-            return ScanWithRapidOcr(originalUpscaled, height);
+            using var fullImage = Upscale(regionBitmap, 2);
+            return ScanWithRapidOcr(fullImage, height);
         }
         
-        // 否则使用 Tesseract OCR（需要反转图片）
+        // 否则使用 Tesseract OCR（需要裁剪和反转图片）
         return ScanWithTesseract(png, height, upscaled);
     }
     
@@ -90,6 +90,11 @@ internal sealed class OcrScanner : IDisposable
         
         try
         {
+            // 保存调试图片
+            var debugPath = Path.Combine(AppContext.BaseDirectory, "debug_rapidocr.png");
+            image.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
+            _log?.Invoke($"[调试] 保存图片: {debugPath} ({image.Width}x{image.Height})");
+            
             var result = _rapidOcr!.Recognize(image);
             
             if (result.Success && result.Items.Count > 0)
@@ -99,6 +104,8 @@ internal sealed class OcrScanner : IDisposable
                     var normalizedRaw = NormalizeName(item.Text);
                     var multiplier = ExtractMultiplier(normalizedRaw);
                     var normalized = StripLeadingNoise(normalizedRaw);
+                    
+                    _log?.Invoke($"RapidOCR: raw='{item.Text}' norm='{normalized}' len={normalized.Length} hasLong={HasLongWord(normalized, MinWordLength)}");
                     
                     if (normalized.Length >= MinNameLength && HasLongWord(normalized, MinWordLength))
                     {
