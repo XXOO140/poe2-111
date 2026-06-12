@@ -7,7 +7,6 @@ PaddleOCR 识别脚本 - 用于 PoE2 物价助手
 import sys
 import json
 import os
-import base64
 from pathlib import Path
 
 # 设置环境变量，减少 PaddleOCR 的日志输出
@@ -19,15 +18,11 @@ def setup_paddleocr():
     try:
         from paddleocr import PaddleOCR
         # 使用中文模型，支持简体和繁体
-        # 使用新参数名
         ocr = PaddleOCR(
-            use_textline_orientation=True,  # 使用方向分类器
-            lang='ch',  # 中文模型
-            show_log=False,  # 不显示日志
-            use_gpu=False,  # 使用 CPU
-            text_detection_model_dir=None,  # 使用默认模型
-            text_recognition_model_dir=None,
-            textline_orientation_model_dir=None
+            use_textline_orientation=True,
+            lang='ch',
+            show_log=False,
+            use_gpu=False
         )
         return ocr
     except Exception as e:
@@ -41,6 +36,24 @@ def setup_paddleocr():
 def recognize_image(ocr, image_path):
     """识别图片中的文字"""
     try:
+        # 检查文件是否存在
+        if not os.path.exists(image_path):
+            return {
+                'success': False,
+                'error': f'文件不存在: {image_path}',
+                'items': []
+            }
+        
+        # 检查文件大小
+        file_size = os.path.getsize(image_path)
+        if file_size == 0:
+            return {
+                'success': False,
+                'error': '文件为空',
+                'items': []
+            }
+        
+        # 识别图片
         result = ocr.ocr(image_path, cls=True)
         
         items = []
@@ -73,9 +86,10 @@ def recognize_image(ocr, image_path):
             'count': len(items)
         }
     except Exception as e:
+        import traceback
         return {
             'success': False,
-            'error': str(e),
+            'error': f'{str(e)}\n{traceback.format_exc()}',
             'items': []
         }
 
@@ -94,15 +108,8 @@ def main():
     # 初始化 PaddleOCR
     ocr = setup_paddleocr()
     
-    # 判断输入是文件路径
-    if os.path.exists(input_data):
-        result = recognize_image(ocr, input_data)
-    else:
-        result = {
-            'success': False,
-            'error': f'文件不存在: {input_data}',
-            'items': []
-        }
+    # 识别图片
+    result = recognize_image(ocr, input_data)
     
     # 输出结果
     print(json.dumps(result, ensure_ascii=False))

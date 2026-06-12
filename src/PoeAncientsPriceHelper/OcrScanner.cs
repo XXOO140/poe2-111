@@ -70,13 +70,14 @@ internal sealed class OcrScanner : IDisposable
         byte[] png = ToPng(upscaled);
         int height = regionBitmap.Height;
 
-        // 如果启用 PaddleOCR，使用 PaddleOCR 进行识别
+        // 如果启用 PaddleOCR，使用原图（不反转）
         if (_usePaddleOcr && _paddleOcr != null && _paddleOcr.IsAvailable)
         {
-            return ScanWithPaddleOcr(upscaled, height);
+            using var originalUpscaled = Upscale(cropped, UpscaleFactor);
+            return ScanWithPaddleOcr(originalUpscaled, height);
         }
         
-        // 否则使用 Tesseract OCR
+        // 否则使用 Tesseract OCR（需要反转图片）
         return ScanWithTesseract(png, height, upscaled);
     }
     
