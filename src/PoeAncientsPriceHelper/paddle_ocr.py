@@ -4,20 +4,19 @@ PaddleOCR 识别脚本 - 用于 PoE2 物价助手
 使用 PaddleOCR 进行中文文字识别
 """
 
+import os
 import sys
 import json
-import os
-from pathlib import Path
 
 # 设置环境变量，减少 PaddleOCR 的日志输出
 os.environ['GLOG_minloglevel'] = '2'
 os.environ['FLAGS_minloglevel'] = '2'
+os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
 
 def setup_paddleocr():
     """初始化 PaddleOCR"""
     try:
         from paddleocr import PaddleOCR
-        # 使用中文模型，支持简体和繁体
         ocr = PaddleOCR(
             use_textline_orientation=True,
             lang='ch',
@@ -36,7 +35,6 @@ def setup_paddleocr():
 def recognize_image(ocr, image_path):
     """识别图片中的文字"""
     try:
-        # 检查文件是否存在
         if not os.path.exists(image_path):
             return {
                 'success': False,
@@ -44,7 +42,6 @@ def recognize_image(ocr, image_path):
                 'items': []
             }
         
-        # 检查文件大小
         file_size = os.path.getsize(image_path)
         if file_size == 0:
             return {
@@ -53,21 +50,19 @@ def recognize_image(ocr, image_path):
                 'items': []
             }
         
-        # 识别图片
         result = ocr.ocr(image_path, cls=True)
         
         items = []
         if result and len(result) > 0:
             for line in result[0]:
                 if line and len(line) >= 2:
-                    bbox = line[0]  # 边界框坐标
-                    text_info = line[1]  # (文字, 置信度)
+                    bbox = line[0]
+                    text_info = line[1]
                     
                     if text_info and len(text_info) >= 2:
                         text = text_info[0]
                         confidence = text_info[1]
                         
-                        # 计算中心 Y 坐标
                         if bbox and len(bbox) >= 4:
                             y_coords = [point[1] for point in bbox]
                             center_y = int(sum(y_coords) / len(y_coords))
@@ -94,7 +89,6 @@ def recognize_image(ocr, image_path):
         }
 
 def main():
-    """主函数"""
     if len(sys.argv) < 2:
         print(json.dumps({
             'success': False,
@@ -104,14 +98,8 @@ def main():
         sys.exit(1)
     
     input_data = sys.argv[1]
-    
-    # 初始化 PaddleOCR
     ocr = setup_paddleocr()
-    
-    # 识别图片
     result = recognize_image(ocr, input_data)
-    
-    # 输出结果
     print(json.dumps(result, ensure_ascii=False))
 
 if __name__ == '__main__':
