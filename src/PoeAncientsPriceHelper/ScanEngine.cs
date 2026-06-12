@@ -259,6 +259,53 @@ internal sealed class ScanEngine : IDisposable
                 rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "unique belt", true, MemeKind.Headhunter));
                 continue;
             }
+            
+            // 中文彩蛋：带有"独特"的物品统一显示为猎首/法血
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("腰带"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特腰带", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("头盔"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特头盔", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("护甲"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特护甲", true, MemeKind.Mirror));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("手套"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特手套", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("鞋子"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特鞋子", true, MemeKind.Mirror));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("武器"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特武器", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("盾牌"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特盾牌", true, MemeKind.Mirror));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("戒指"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特戒指", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("项链"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "独特项链", true, MemeKind.Mirror));
+                continue;
+            }
 
             // Resolve the OCR'd name to a price key: exact → prefix → fuzzy (edit distance).
             // The fuzzy step rescues single-character misreads ("viswn" → "vision"). The matched

@@ -436,6 +436,13 @@ internal sealed class PriceRepository : IDisposable
         var s = name.ToLowerInvariant();
         // 保留中文字符、英文字符、数字和空格
         s = Regex.Replace(s, @"[^\w\s\u4e00-\u9fff\u3400-\u4dbf]", " ");
+        // 合并中文字符之间的空格
+        string prev;
+        do
+        {
+            prev = s;
+            s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf])\s+([\u4e00-\u9fff\u3400-\u4dbf])", "$1$2");
+        } while (s != prev);
         s = Regex.Replace(s, @"\s+", " ");
         return s.Trim();
     }
