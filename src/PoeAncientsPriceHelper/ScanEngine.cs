@@ -361,8 +361,8 @@ internal sealed class ScanEngine : IDisposable
     }
 
     // Minimum character-similarity (1 - editDistance/maxLen) for a fuzzy price match.
-    // 0.60 for Chinese support (更宽松，处理OCR识别错误)
-    private const double FuzzyThreshold = 0.60;
+    // 0.50 for Chinese support (更宽松，处理OCR识别错误)
+    private const double FuzzyThreshold = 0.50;
 
     // Closest price key to an OCR'd name by Levenshtein similarity, or null if nothing clears
     // FuzzyThreshold. Only candidates within ±5 of the name's length are considered (cheaper,
@@ -377,6 +377,22 @@ internal sealed class ScanEngine : IDisposable
             int dist = Levenshtein(name, key);
             double score = 1.0 - (double)dist / Math.Max(name.Length, key.Length);
             if (score > bestScore) { bestScore = score; best = key; }
+        }
+        // 如果编辑距离匹配失败，尝试包含匹配
+        if (best == null)
+        {
+            foreach (var key in snapshot.Keys)
+            {
+                // 检查是否包含关系
+                if (key.Contains(name) || name.Contains(key))
+                {
+                    if (Math.Abs(key.Length - name.Length) <= 3)
+                    {
+                        best = key;
+                        break;
+                    }
+                }
+            }
         }
         return best;
     }
