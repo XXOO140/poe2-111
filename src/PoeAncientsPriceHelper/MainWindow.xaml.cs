@@ -102,6 +102,11 @@ public partial class MainWindow : MetroWindow
         var key = HotkeyBinding.Parse(_config.StartStopHotkey);
         HotkeyLabel.Text = HotkeyBinding.Display(key);
         App.SetStartStopKey(key);
+        
+        // 显示校准热键
+        var calibrateKey = HotkeyBinding.Parse(_config.CalibrateHotkey);
+        CalibrateHotkeyLabel.Text = HotkeyBinding.Display(calibrateKey);
+        
         UpdateRegionLabel();
         _loading = false;
     }
@@ -295,38 +300,70 @@ public partial class MainWindow : MetroWindow
 
     private void RebindButton_Click(object sender, RoutedEventArgs e)
     {
-        Log("开始重新绑定热键...");
+        Log("开始重新绑定启动/停止热键...");
         RebindButton.IsEnabled = false;
         RebindButton.Content = "请按键... (Esc 取消)";
-        App.BeginHotkeyCapture(OnHotkeyCaptured);
+        App.BeginHotkeyCapture(OnStartStopHotkeyCaptured);
+    }
+    
+    private void RebindCalibrateButton_Click(object sender, RoutedEventArgs e)
+    {
+        Log("开始重新绑定校准热键...");
+        RebindCalibrateButton.IsEnabled = false;
+        RebindCalibrateButton.Content = "请按键... (Esc 取消)";
+        App.BeginHotkeyCapture(OnCalibrateHotkeyCaptured);
     }
 
-    private void OnHotkeyCaptured(App.CaptureOutcome outcome, KeyCode code)
+    private void OnStartStopHotkeyCaptured(App.CaptureOutcome outcome, KeyCode code)
     {
         switch (outcome)
         {
             case App.CaptureOutcome.Captured:
-                Log($"热键绑定: {HotkeyBinding.Display(code)}");
+                Log($"启动/停止热键绑定: {HotkeyBinding.Display(code)}");
                 _config.StartStopHotkey = HotkeyBinding.ToStorage(code);
                 ConfigStore.Save(_config);
                 App.SetStartStopKey(code);
                 HotkeyLabel.Text = HotkeyBinding.Display(code);
-                EndRebind();
+                EndStartStopRebind();
                 break;
             case App.CaptureOutcome.Reserved:
-                Log($"热键冲突: {HotkeyBinding.Display(code)}");
                 RebindButton.Content = $"{HotkeyBinding.Display(code)} 已被占用 — 请换一个";
                 break;
             case App.CaptureOutcome.Cancelled:
-                Log("热键绑定取消");
-                EndRebind();
+                EndStartStopRebind();
+                break;
+        }
+    }
+    
+    private void OnCalibrateHotkeyCaptured(App.CaptureOutcome outcome, KeyCode code)
+    {
+        switch (outcome)
+        {
+            case App.CaptureOutcome.Captured:
+                Log($"校准热键绑定: {HotkeyBinding.Display(code)}");
+                _config.CalibrateHotkey = HotkeyBinding.ToStorage(code);
+                ConfigStore.Save(_config);
+                CalibrateHotkeyLabel.Text = HotkeyBinding.Display(code);
+                EndCalibrateRebind();
+                break;
+            case App.CaptureOutcome.Reserved:
+                RebindCalibrateButton.Content = $"{HotkeyBinding.Display(code)} 已被占用 — 请换一个";
+                break;
+            case App.CaptureOutcome.Cancelled:
+                EndCalibrateRebind();
                 break;
         }
     }
 
-    private void EndRebind()
+    private void EndStartStopRebind()
     {
         RebindButton.Content = "重新绑定";
         RebindButton.IsEnabled = true;
+    }
+    
+    private void EndCalibrateRebind()
+    {
+        RebindCalibrateButton.Content = "重新绑定";
+        RebindCalibrateButton.IsEnabled = true;
     }
 }

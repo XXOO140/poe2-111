@@ -21,6 +21,9 @@ internal sealed class AppConfig
     // Start/Stop global hotkey, stored as a SharpHook KeyCode name (e.g. "VcF5"). Missing in older
     // configs → defaults to F5, preserving prior behaviour. See HotkeyBinding for parse/display.
     public string StartStopHotkey { get; set; } = "VcF5";
+    // Calibrate global hotkey, stored as a SharpHook KeyCode name (e.g. "VcF4"). Missing in older
+    // configs → defaults to F4, preserving prior behaviour. See HotkeyBinding for parse/display.
+    public string CalibrateHotkey { get; set; } = "VcF4";
     public string ReferencePixelColor { get; set; } = "#000000"; // kept for JSON backwards compat, unused
     public string CustomPricesPath { get; set; } = "custom_prices.json";
 

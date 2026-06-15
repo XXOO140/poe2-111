@@ -43,15 +43,23 @@
         <TextBlock Grid.Row="1" Grid.Column="0" Text="区域:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
         <TextBlock Grid.Row="1" Grid.Column="1" x:Name="RegionLabel" Text="未校准" Foreground="#666" FontFamily="Consolas" FontSize="11" VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Row="2" Grid.Column="0" Text="启动/停止键:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="校准键:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
         <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
+            <TextBlock x:Name="CalibrateHotkeyLabel" Text="F4" VerticalAlignment="Center"
+                       FontFamily="Consolas" FontSize="12" Foreground="#E0E0E0" MinWidth="46"/>
+            <Button x:Name="RebindCalibrateButton" Content="重新绑定" Padding="10,2" FontSize="11"
+                    Click="RebindCalibrateButton_Click"/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="启动/停止键:" Style="{StaticResource FieldLabel}" VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" Margin="0,4">
             <TextBlock x:Name="HotkeyLabel" Text="F5" VerticalAlignment="Center"
                        FontFamily="Consolas" FontSize="12" Foreground="#E0E0E0" MinWidth="46"/>
             <Button x:Name="RebindButton" Content="重新绑定" Padding="10,2" FontSize="11"
                     Click="RebindButton_Click"/>
         </StackPanel>
 
-        <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2"
                 x:Name="CalibrateButton"
                 Content="校准区域" Margin="0,10,0,0"
                 Click="CalibrateButton_Click"/>
