@@ -16,10 +16,8 @@ internal sealed class OcrScanner : IDisposable
     private readonly object _logLock = new();
     private const float MinConfidence = 10f;
     private const int UpscaleFactor = 2;
-    private const int MinNameLength = 2;  // 中文物品名较短，降低最小长度
-    // A real row must contain a word at least this long. 4 (not 5) so two-short-word names
-    // like "Void Flux" survive; OCR fragments are still mostly 1–3 char tokens.
-    private const int MinWordLength = 2;  // 中文字符每个都是完整的"词"
+    private const int MinNameLength = 2;
+    private const int MinWordLength = 2;
 
     public OcrScanner(string tessdataDir, Action<string>? log = null)
     {
