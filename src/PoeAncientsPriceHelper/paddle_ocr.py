@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-PaddleOCR 识别脚本 - 用于 PoE2 物价助手
-使用 PaddleOCR 进行中文文字识别
+PaddleOCR 3.7.0 识别脚本 - 用于 PoE2 物价助手
+使用 PaddleOCR PP-OCRv6 进行中文文字识别
+支持 50 种语言：中文、英文、日文及 46 种拉丁语系
 """
 
 import os
@@ -14,9 +15,11 @@ os.environ['FLAGS_minloglevel'] = '2'
 os.environ['PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK'] = 'True'
 
 def setup_paddleocr():
-    """初始化 PaddleOCR"""
+    """初始化 PaddleOCR 3.7.0 (PP-OCRv6)"""
     try:
         from paddleocr import PaddleOCR
+        # PaddleOCR 3.7.0 使用 PP-OCRv6，单模型支持 50 种语言
+        # lang='ch' 表示中文模式，自动包含简体和繁体
         ocr = PaddleOCR(lang='ch')
         return ocr
     except Exception as e:
