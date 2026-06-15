@@ -309,8 +309,6 @@ internal sealed class OcrScanner : IDisposable
             prev = s;
             s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf])\s+([\u4e00-\u9fff\u3400-\u4dbf])", "$1$2");
         } while (s != prev);
-        // 去除中文末尾的单个字符噪声
-        s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf]{2,})[\u4e00-\u9fff\u3400-\u4dbf]$", "$1");
         s = Regex.Replace(s, @"\s+", " ");
         return s.Trim();
     }
