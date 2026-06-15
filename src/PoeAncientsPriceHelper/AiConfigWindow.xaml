@@ -27,16 +27,11 @@
                    Text="OCR 引擎:" Foreground="#4ecca3" FontSize="14" Margin="0,0,0,10"/>
         
         <RadioButton Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2"
-                     x:Name="TesseractRadio" Content="Tesseract (默认，无需安装)"
+                     x:Name="TesseractRadio" Content="Tesseract (内置，支持中文简繁+英文)"
                      Foreground="#E0E0E0" FontSize="12" Margin="20,0,0,10"
                      GroupName="OcrEngine" IsChecked="True"/>
         
         <RadioButton Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
-                     x:Name="PaddleOcrRadio" Content="RapidOCR (PaddleOCR 模型，无需 Python)"
-                     Foreground="#66AAFF" FontSize="12" Margin="20,0,0,10"
-                     GroupName="OcrEngine"/>
-        
-        <RadioButton Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                      x:Name="AiRadio" Content="AI 识别 (使用 AI API 识别，需配置 API)"
                      Foreground="#AA66FF" FontSize="12" Margin="20,0,0,15"
                      GroupName="OcrEngine"/>

@@ -30,17 +30,13 @@ public partial class AiConfigWindow : Window
                 if (config != null)
                 {
                     // 设置 OCR 引擎选择
-                    switch (config.OcrEngine)
+                    if (config.OcrEngine == "AI")
                     {
-                        case "PaddleOCR":
-                            PaddleOcrRadio.IsChecked = true;
-                            break;
-                        case "AI":
-                            AiRadio.IsChecked = true;
-                            break;
-                        default:
-                            TesseractRadio.IsChecked = true;
-                            break;
+                        AiRadio.IsChecked = true;
+                    }
+                    else
+                    {
+                        TesseractRadio.IsChecked = true;
                     }
                     
                     ApiEndpointTextBox.Text = config.ApiEndpoint ?? "https://api.openai.com/v1/chat/completions";
@@ -130,14 +126,12 @@ public partial class AiConfigWindow : Window
         try
         {
             // 确定选择的 OCR 引擎
-            string ocrEngine = "Tesseract";
-            if (PaddleOcrRadio.IsChecked == true) ocrEngine = "PaddleOCR";
-            if (AiRadio.IsChecked == true) ocrEngine = "AI";
+            string ocrEngine = AiRadio.IsChecked == true ? "AI" : "Tesseract";
             
             var config = new AiConfig
             {
-                Enabled = ocrEngine == "AI" || ocrEngine == "PaddleOCR",
-                UsePaddleOcr = ocrEngine == "PaddleOCR",
+                Enabled = ocrEngine == "AI",
+                UsePaddleOcr = false,
                 OcrEngine = ocrEngine,
                 ApiEndpoint = ApiEndpointTextBox.Text?.Trim() ?? "",
                 ApiKey = ApiKeyPasswordBox.Password?.Trim() ?? "",
