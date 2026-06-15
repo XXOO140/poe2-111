@@ -12,7 +12,6 @@ internal sealed class OcrScanner : IDisposable
     // engines are single-threaded internally, but separate instances on separate threads are fine.
     private readonly TesseractEngine _engineCol;
     private readonly TesseractEngine _engineSparse;
-    private readonly RapidOcrService? _rapidOcr;
     private readonly Action<string>? _log;
     private readonly object _logLock = new();
     private const float MinConfidence = 10f;
@@ -21,34 +20,15 @@ internal sealed class OcrScanner : IDisposable
     // A real row must contain a word at least this long. 4 (not 5) so two-short-word names
     // like "Void Flux" survive; OCR fragments are still mostly 1–3 char tokens.
     private const int MinWordLength = 2;  // 中文字符每个都是完整的"词"
-    
-    // 是否使用 RapidOCR (PaddleOCR 模型)
-    private readonly bool _useRapidOcr;
 
-    public OcrScanner(string tessdataDir, Action<string>? log = null, bool useRapidOcr = false)
+    public OcrScanner(string tessdataDir, Action<string>? log = null)
     {
         _log = log;
-        _useRapidOcr = useRapidOcr;
         
         // 初始化 Tesseract OCR
         _engineCol = new TesseractEngine(tessdataDir, "chi_sim+chi_tra+eng", EngineMode.Default);
         _engineSparse = new TesseractEngine(tessdataDir, "chi_sim+chi_tra+eng", EngineMode.Default);
         log?.Invoke("Tesseract OCR 引擎初始化: 简体中文+繁体中文+英文");
-        
-        // 如果启用 RapidOCR，初始化 RapidOCR 服务
-        if (_useRapidOcr)
-        {
-            _rapidOcr = new RapidOcrService(log);
-            if (_rapidOcr.IsAvailable)
-            {
-                log?.Invoke("RapidOCR 服务已启用 (PaddleOCR 模型)");
-            }
-            else
-            {
-                log?.Invoke("[警告] RapidOCR 不可用，将使用 Tesseract OCR");
-                _useRapidOcr = false;
-            }
-        }
     }
 
     // Each row starts with ~3 cost-rune glyphs on the left, then "Nx ItemName". Cropping the
@@ -70,62 +50,8 @@ internal sealed class OcrScanner : IDisposable
         byte[] png = ToPng(upscaled);
         int height = regionBitmap.Height;
 
-        // 如果启用 RapidOCR，使用完整图片（不裁剪，不反转）
-        if (_useRapidOcr && _rapidOcr != null && _rapidOcr.IsAvailable)
-        {
-            using var fullImage = Upscale(regionBitmap, 2);
-            return ScanWithRapidOcr(fullImage, height);
-        }
-        
-        // 否则使用 Tesseract OCR（需要裁剪和反转图片）
+        // 使用 Tesseract OCR
         return ScanWithTesseract(png, height, upscaled);
-    }
-    
-    /// <summary>
-    /// 使用 RapidOCR 进行识别
-    /// </summary>
-    private IReadOnlyList<OcrRow> ScanWithRapidOcr(Bitmap image, int regionHeight)
-    {
-        var rows = new List<OcrRow>();
-        
-        try
-        {
-            // 保存调试图片
-            var debugPath = Path.Combine(AppContext.BaseDirectory, "debug_rapidocr.png");
-            image.Save(debugPath, System.Drawing.Imaging.ImageFormat.Png);
-            _log?.Invoke($"[调试] 保存图片: {debugPath} ({image.Width}x{image.Height})");
-            
-            var result = _rapidOcr!.Recognize(image);
-            
-            if (result.Success && result.Items.Count > 0)
-            {
-                foreach (var item in result.Items)
-                {
-                    var normalizedRaw = NormalizeName(item.Text);
-                    var multiplier = ExtractMultiplier(normalizedRaw);
-                    var normalized = StripLeadingNoise(normalizedRaw);
-                    
-                    _log?.Invoke($"RapidOCR: raw='{item.Text}' norm='{normalized}' len={normalized.Length} hasLong={HasLongWord(normalized, MinWordLength)}");
-                    
-                    if (normalized.Length >= MinNameLength && HasLongWord(normalized, MinWordLength))
-                    {
-                        rows.Add(new OcrRow(normalized, item.Text.Trim(), item.CenterY, multiplier));
-                    }
-                }
-                
-                _log?.Invoke($"RapidOCR 识别到 {result.Items.Count} 行，过滤后 {rows.Count} 行");
-            }
-            else
-            {
-                _log?.Invoke($"RapidOCR 识别失败或无结果: {result.Message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            _log?.Invoke($"RapidOCR 识别异常: {ex.Message}");
-        }
-        
-        return rows;
     }
     
     /// <summary>
@@ -346,6 +272,5 @@ internal sealed class OcrScanner : IDisposable
     { 
         _engineCol.Dispose(); 
         _engineSparse.Dispose();
-        _rapidOcr?.Dispose();
     }
 }
