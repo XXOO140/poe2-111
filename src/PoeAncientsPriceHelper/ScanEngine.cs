@@ -316,9 +316,19 @@ internal sealed class ScanEngine : IDisposable
             PriceEntry? entry;
             string matchedKey = row.NormalizedName;
             bool exact = false;
+            
+            // 首先尝试直接匹配
             if (snapshot.TryGetValue(row.NormalizedName, out entry))
             {
                 exact = true;
+            }
+            // 尝试通过映射表翻译后匹配
+            else if (_prices.TryTranslateToEnglish(row.NormalizedName) is { } englishKey &&
+                     snapshot.TryGetValue(englishKey, out entry))
+            {
+                exact = true;
+                matchedKey = englishKey;
+                _log?.Invoke($"映射匹配: {row.NormalizedName} -> {englishKey}");
             }
             else if (row.NormalizedName.Length >= 3 &&
                      snapshot.Keys.Where(k => k.StartsWith(row.NormalizedName, StringComparison.Ordinal))
