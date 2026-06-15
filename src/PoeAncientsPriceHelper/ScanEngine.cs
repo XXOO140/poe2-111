@@ -261,6 +261,18 @@ internal sealed class ScanEngine : IDisposable
                 continue;
             }
             
+            // 英文彩蛋: "Very Rare Unique item" → Headhunter
+            if (row.NormalizedName.Contains("very rare") && row.NormalizedName.Contains("unique"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "very rare unique", true, MemeKind.Headhunter));
+                continue;
+            }
+            if (row.NormalizedName.Contains("unique") && row.NormalizedName.Contains("item"))
+            {
+                rows.Add(new PriceRow(stableY, row.RawText, 0m, 0m, true, row.Multiplier, "unique item", true, MemeKind.Headhunter));
+                continue;
+            }
+            
             // 中文彩蛋：带有"独特"的物品统一显示为猎首/法血
             if (row.NormalizedName.Contains("独特") && row.NormalizedName.Contains("腰带"))
             {
