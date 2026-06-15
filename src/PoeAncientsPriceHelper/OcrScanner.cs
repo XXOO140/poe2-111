@@ -80,7 +80,9 @@ internal sealed class OcrScanner : IDisposable
                     
                     if (normalized.Length >= MinNameLength && HasLongWord(normalized, MinWordLength))
                     {
-                        rows.Add(new OcrRow(normalized, item.Text.Trim(), item.CenterY, multiplier));
+                        // RapidOCR 的 Y 坐标需要除以缩放因子 (UpscaleFactor=2)
+                        int centerY = item.CenterY / UpscaleFactor;
+                        rows.Add(new OcrRow(normalized, item.Text.Trim(), centerY, multiplier));
                     }
                 }
                 
