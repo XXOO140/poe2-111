@@ -328,7 +328,6 @@ internal sealed class ScanEngine : IDisposable
             {
                 exact = true;
                 matchedKey = englishKey;
-                _log?.Invoke($"映射匹配: {row.NormalizedName} -> {englishKey}");
             }
             else if (row.NormalizedName.Length >= 3 &&
                      snapshot.Keys.Where(k => k.StartsWith(row.NormalizedName, StringComparison.Ordinal))
