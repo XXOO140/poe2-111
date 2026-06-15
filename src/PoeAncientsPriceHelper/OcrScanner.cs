@@ -12,6 +12,7 @@ internal sealed class OcrScanner : IDisposable
     // engines are single-threaded internally, but separate instances on separate threads are fine.
     private readonly TesseractEngine _engineCol;
     private readonly TesseractEngine _engineSparse;
+    private readonly RapidOcrService? _rapidOcr;
     private readonly Action<string>? _log;
     private readonly object _logLock = new();
     private const float MinConfidence = 10f;
@@ -27,6 +28,17 @@ internal sealed class OcrScanner : IDisposable
         _engineCol = new TesseractEngine(tessdataDir, "chi_sim+chi_tra+eng", EngineMode.Default);
         _engineSparse = new TesseractEngine(tessdataDir, "chi_sim+chi_tra+eng", EngineMode.Default);
         log?.Invoke("Tesseract OCR 引擎初始化: 简体中文+繁体中文+英文");
+        
+        // 初始化 RapidOCR (PP-OCRv6 中文模型)
+        _rapidOcr = new RapidOcrService(log);
+        if (_rapidOcr.IsAvailable)
+        {
+            log?.Invoke("RapidOCR 服务已启用 (PP-OCRv6 中文模型)");
+        }
+        else
+        {
+            log?.Invoke("[警告] RapidOCR 不可用，将使用 Tesseract OCR");
+        }
     }
 
     // Each row starts with ~3 cost-rune glyphs on the left, then "Nx ItemName". Cropping the
@@ -48,8 +60,55 @@ internal sealed class OcrScanner : IDisposable
         byte[] png = ToPng(upscaled);
         int height = regionBitmap.Height;
 
-        // 使用 Tesseract OCR
+        // 如果 RapidOCR 可用，使用它（中文识别更好）
+        if (_rapidOcr != null && _rapidOcr.IsAvailable)
+        {
+            using var originalUpscaled = Upscale(cropped, 2);
+            return ScanWithRapidOcr(originalUpscaled, height);
+        }
+        
+        // 否则使用 Tesseract OCR
         return ScanWithTesseract(png, height, upscaled);
+    }
+    
+    /// <summary>
+    /// 使用 RapidOCR 进行识别
+    /// </summary>
+    private IReadOnlyList<OcrRow> ScanWithRapidOcr(Bitmap image, int regionHeight)
+    {
+        var rows = new List<OcrRow>();
+        
+        try
+        {
+            var result = _rapidOcr!.Recognize(image);
+            
+            if (result.Success && result.Items.Count > 0)
+            {
+                foreach (var item in result.Items)
+                {
+                    var normalizedRaw = NormalizeName(item.Text);
+                    var multiplier = ExtractMultiplier(normalizedRaw);
+                    var normalized = StripLeadingNoise(normalizedRaw);
+                    
+                    if (normalized.Length >= MinNameLength && HasLongWord(normalized, MinWordLength))
+                    {
+                        rows.Add(new OcrRow(normalized, item.Text.Trim(), item.CenterY, multiplier));
+                    }
+                }
+                
+                _log?.Invoke($"RapidOCR 识别到 {result.Items.Count} 行，过滤后 {rows.Count} 行");
+            }
+            else
+            {
+                _log?.Invoke($"RapidOCR 识别失败或无结果: {result.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _log?.Invoke($"RapidOCR 识别异常: {ex.Message}");
+        }
+        
+        return rows;
     }
     
     /// <summary>
@@ -270,5 +329,6 @@ internal sealed class OcrScanner : IDisposable
     { 
         _engineCol.Dispose(); 
         _engineSparse.Dispose();
+        _rapidOcr?.Dispose();
     }
 }
