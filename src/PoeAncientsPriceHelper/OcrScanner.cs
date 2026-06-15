@@ -254,7 +254,7 @@ internal sealed class OcrScanner : IDisposable
         var s = text.ToLowerInvariant();
         // 保留中文字符、英文字符、数字和空格
         s = Regex.Replace(s, @"[^\w\s\u4e00-\u9fff\u3400-\u4dbf]", " ");
-        // 合并中文字符之间的空格 (例如 "机 会 石" -> "机会石")
+        // 合并中文字符之间的空格 (例如 "符 文 合 金" -> "符文合金")
         // 多次执行直到没有变化
         string prev;
         do
@@ -262,9 +262,9 @@ internal sealed class OcrScanner : IDisposable
             prev = s;
             s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf])\s+([\u4e00-\u9fff\u3400-\u4dbf])", "$1$2");
         } while (s != prev);
-        s = Regex.Replace(s, @"\s+", " ");
-        // 去除中文末尾的单个字符噪声 (例如 "独特头盔偷" -> "独特头盔")
+        // 去除中文末尾的单个字符噪声
         s = Regex.Replace(s, @"([\u4e00-\u9fff\u3400-\u4dbf]{2,})[\u4e00-\u9fff\u3400-\u4dbf]$", "$1");
+        s = Regex.Replace(s, @"\s+", " ");
         return s.Trim();
     }
 
