@@ -33,12 +33,8 @@ internal sealed class OcrScanner : IDisposable
         _rapidOcr = new RapidOcrService(log);
     }
 
-    // Each row starts with ~3 cost-rune glyphs on the left, then "Nx ItemName". Cropping the
-    // left IconColumnFraction removes the glyphs (which produce leading OCR garbage) while
-    // keeping the quantity marker and the name. RightTrimFraction shaves the panel's right
-    // border, which otherwise tacks stray characters onto the last word.
-    // (internal so the overlay can draw a box matching exactly what is OCR'd.)
-    internal const double IconColumnFraction = 0.30;
+    // 不裁剪左边，保留完整的物品名（包括 1x, 2x 等数量标记）
+    internal const double IconColumnFraction = 0.0;
     internal const double RightTrimFraction = 0.02;
 
     public IReadOnlyList<OcrRow> Scan(Bitmap regionBitmap)
