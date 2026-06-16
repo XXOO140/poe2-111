@@ -108,7 +108,6 @@ internal sealed class PriceRepository : IDisposable
                     _enToCn[enKey] = cnKey;   // 英文 -> 中文
                 }
             }
-            }
             Log($"[成功] 加载 {_cnToEn.Count} 个中文映射");
         }
         catch (Exception ex)
