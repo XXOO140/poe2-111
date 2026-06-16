@@ -106,6 +106,7 @@ public partial class MainWindow : MetroWindow
         // 显示校准热键
         var calibrateKey = HotkeyBinding.Parse(_config.CalibrateHotkey);
         CalibrateHotkeyLabel.Text = HotkeyBinding.Display(calibrateKey);
+        App.SetCalibrateKey(calibrateKey);
         
         UpdateRegionLabel();
         _loading = false;
@@ -200,7 +201,7 @@ public partial class MainWindow : MetroWindow
         }
     }
 
-    private void RunCalibration()
+    internal void RunCalibration()
     {
         Log("开始校准区域...");
         var rect = CalibrationOverlay.RunOnStaThread();
@@ -343,6 +344,7 @@ public partial class MainWindow : MetroWindow
                 Log($"校准热键绑定: {HotkeyBinding.Display(code)}");
                 _config.CalibrateHotkey = HotkeyBinding.ToStorage(code);
                 ConfigStore.Save(_config);
+                App.SetCalibrateKey(code);
                 CalibrateHotkeyLabel.Text = HotkeyBinding.Display(code);
                 EndCalibrateRebind();
                 break;

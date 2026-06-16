@@ -17,6 +17,10 @@ public partial class App : System.Windows.Application
     // value once config is loaded and again on each rebind; until then F5 keeps working as before.
     private static volatile KeyCode _startStopKey = HotkeyBinding.Default;
     internal static void SetStartStopKey(KeyCode key) => _startStopKey = key;
+    
+    // The currently-bound Calibrate key
+    private static volatile KeyCode _calibrateKey = KeyCode.VcF4;
+    internal static void SetCalibrateKey(KeyCode key) => _calibrateKey = key;
 
     // One-shot rebind capture. While active, the hook swallows keys from their normal actions and the
     // next non-reserved key becomes the binding. Outcomes are reported via the callback, marshalled to
@@ -98,6 +102,7 @@ public partial class App : System.Windows.Application
             // Toggle on release (not press) so holding the key can't auto-repeat-fire many toggles.
             if (code == KeyCode.VcF3) PriceOverlayManager.ToggleDebug();
             else if (code == _startStopKey) InvokeStartStopToggle();
+            else if (code == _calibrateKey) InvokeCalibrate();
             else if (code is KeyCode.VcLeftControl) _leftCtrlDown = false;
         };
         // Left-Ctrl + left click (the in-game "purchase" gesture) also dismisses the overlay.
@@ -137,6 +142,9 @@ public partial class App : System.Windows.Application
 
     private static void InvokeStartStopToggle() =>
         Current?.Dispatcher.BeginInvoke(() => (Current.MainWindow as MainWindow)?.ToggleStartStop());
+    
+    private static void InvokeCalibrate() =>
+        Current?.Dispatcher.BeginInvoke(() => (Current.MainWindow as MainWindow)?.RunCalibration());
 
     protected override void OnExit(ExitEventArgs e)
     {
