@@ -98,10 +98,10 @@ internal sealed class PriceRepository : IDisposable
             }
             
             // mapping 格式: key=中文名(简体/繁体), value=英文名
-            foreach (var (cnName, enName) in mapping)
+            foreach (var kvp in mapping)
             {
-                var cnKey = NormalizeName(cnName);
-                var enKey = NormalizeName(enName);
+                var cnKey = NormalizeName(kvp.Key);
+                var enKey = NormalizeName(kvp.Value);
                 if (!string.IsNullOrEmpty(enKey) && !string.IsNullOrEmpty(cnKey))
                 {
                     _cnToEn[cnKey] = enKey;   // 中文 -> 英文
