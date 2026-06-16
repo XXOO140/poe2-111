@@ -97,16 +97,17 @@ internal sealed class PriceRepository : IDisposable
                 return;
             }
             
-            // mapping 格式: key=英文名, value=中文名
-            foreach (var (enName, cnName) in mapping)
+            // mapping 格式: key=中文名(简体/繁体), value=英文名
+            foreach (var (cnName, enName) in mapping)
             {
-                var enKey = NormalizeName(enName);
                 var cnKey = NormalizeName(cnName);
+                var enKey = NormalizeName(enName);
                 if (!string.IsNullOrEmpty(enKey) && !string.IsNullOrEmpty(cnKey))
                 {
-                    _cnToEn[cnKey] = enKey;
-                    _enToCn[enKey] = cnKey;
+                    _cnToEn[cnKey] = enKey;   // 中文 -> 英文
+                    _enToCn[enKey] = cnKey;   // 英文 -> 中文
                 }
+            }
             }
             Log($"[成功] 加载 {_cnToEn.Count} 个中文映射");
         }
