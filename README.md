@@ -16,11 +16,10 @@
 
 - **OCR 识别** - 自动识别屏幕上的物品名称
 - **中文支持** - 支持简体中文、繁体中文、英文
-- **PaddleOCR** - 更精准的中文识别（需安装 Python）
-- **AI 识别** - 支持 OpenAI 兼容协议的 AI 图片识别
+- **RapidOCR** - 使用 PaddleOCR 模型，中文识别更准确
 - **实时价格** - 从 poe.ninja 获取最新价格
 - **本地缓存** - 价格数据本地存储，30分钟自动同步
-- **中英映射** - 183+ 个物品的中英文对照
+- **中英映射** - 928 个物品的中英文对照
 - **日志系统** - 详细的运行日志，方便排错
 
 ---
@@ -28,24 +27,24 @@
 ## 系统要求
 
 - Windows 10/11 64位
-- 基础版：不需要安装 Python 或 .NET
-- PaddleOCR 版：需要安装 Python 3.8+
+- 不需要安装 Python 或 .NET
 
 ---
 
 ## 下载安装
 
-### 方法一：直接下载
+### 方法一：下载发布版本
 
-1. 下载最新发布版本
-2. 解压到任意目录
-3. 双击 `PoeAncientsPriceHelper.exe` 运行
+1. 访问 [Releases](https://github.com/XXOO140/poe2-111/releases)
+2. 下载最新版本的 zip 文件
+3. 解压到任意目录
+4. 双击 `PoeAncientsPriceHelper.exe` 运行
 
 ### 方法二：从源码编译
 
 ```bash
-git clone https://github.com/XXOO140/poe2-.git
-cd poe2-
+git clone https://github.com/XXOO140/poe2-111.git
+cd poe2-111
 dotnet publish src/PoeAncientsPriceHelper/ -c Release -r win-x64 --self-contained true -o publish
 ```
 
@@ -102,60 +101,6 @@ dotnet publish src/PoeAncientsPriceHelper/ -c Release -r win-x64 --self-containe
 
 ---
 
-## OCR 引擎配置
-
-### Tesseract（默认）
-
-内置支持，无需额外安装。支持简体中文、繁体中文、英文。
-
-### PaddleOCR（推荐）
-
-更精准的中文识别，需要安装 Python 依赖。
-
-#### 安装方法
-
-```
-双击 install_paddleocr.cmd
-```
-
-或手动安装：
-```bash
-pip install paddlepaddle paddleocr
-```
-
-#### 启用 PaddleOCR
-
-1. 点击 **"AI 识别配置"** 按钮
-2. 勾选 **"使用 PaddleOCR"**
-3. 保存并重启程序
-
----
-
-## AI 识别配置
-
-支持 OpenAI 兼容协议，可使用各种 AI 服务。
-
-### 配置步骤
-
-1. 点击 **"AI 识别配置"** 按钮
-2. 填写配置：
-   - **API 端点**: `https://api.openai.com/v1/chat/completions`
-   - **API 密钥**: 你的 API 密钥
-   - **模型**: `gpt-4o-mini`
-3. 点击 **"测试 AI 识别"** 验证配置
-4. 保存并重启程序
-
-### 支持的 AI 服务
-
-| 服务 | 端点 |
-|------|------|
-| OpenAI | `https://api.openai.com/v1/chat/completions` |
-| Claude (兼容) | `https://api.anthropic.com/v1/messages` |
-| 本地 LLM | `http://localhost:11434/v1/chat/completions` |
-| 其他 OpenAI 兼容 | 自定义端点 |
-
----
-
 ## 界面说明
 
 ```
@@ -164,6 +109,7 @@ pip install paddlepaddle paddleocr
 ├─────────────────────────────────────────┤
 │  联赛: [Standard ▼]                     │
 │  区域: x=100 y=200 800×600              │
+│  校准键: [F4] [重新绑定]                 │
 │  启动/停止键: [F5] [重新绑定]            │
 │  [校准区域]                              │
 │  ┌─────────────────────────────────┐    │
@@ -175,7 +121,6 @@ pip install paddlepaddle paddleocr
 │  已加载 79 个物品 · 上次获取 06月12日    │
 │  [启动]                                 │
 │  [手动同步价格]                          │
-│  [AI 识别配置]                           │
 │                    v1.1.4  [请我喝咖啡]  │
 └─────────────────────────────────────────┘
 ```
@@ -202,7 +147,6 @@ pip install paddlepaddle paddleocr
 | `app.log` | 应用程序日志（启动、关闭、热键、校准等） |
 | `price_sync.log` | 价格同步日志（同步过程、错误、重试等） |
 | `scan_log.txt` | 扫描引擎日志（OCR识别、物品匹配等） |
-| `ai_recognition.log` | AI 识别日志 |
 
 ---
 
@@ -211,21 +155,12 @@ pip install paddlepaddle paddleocr
 ```
 publish/
 ├── PoeAncientsPriceHelper.exe  # 主程序
-├── item_names_cn.json          # 中英文映射表
-├── tessdata/                   # OCR语言数据
-│   ├── chi_sim.traineddata     # 简体中文
-│   ├── chi_tra.traineddata     # 繁体中文
-│   └── eng.traineddata         # 英文
-├── paddle_ocr.py               # PaddleOCR 脚本
-├── requirements_paddle.txt     # PaddleOCR 依赖
-├── install_paddleocr.cmd       # PaddleOCR 安装脚本
-├── setup_portable_python.cmd   # 便携式 Python 安装脚本
-├── ai_config.json              # AI 配置文件
-└── logs/                       # 日志文件夹
-    ├── app.log
-    ├── price_sync.log
-    ├── scan_log.txt
-    └── ai_recognition.log
+├── item_names_cn.json          # 中英文映射表 (928个)
+├── models/v6/                  # RapidOCR 模型
+│   ├── det.onnx                # 检测模型
+│   └── rec.onnx                # 识别模型
+├── logs/                       # 日志目录
+└── Start.cmd                   # 启动脚本
 ```
 
 ---
@@ -237,14 +172,13 @@ publish/
 A: 检查以下几点：
 1. 校准时是否打开了游戏物品列表
 2. 校准区域是否准确框选了物品显示区域
-3. 查看 `scan_log.txt` 确认 OCR 是否正常工作
-4. 尝试启用 PaddleOCR 提升识别率
+3. 查看 `logs/scan_log.txt` 确认 OCR 是否正常工作
 
 ### Q: 价格显示不正确？
 
 A: 
 1. 点击"手动同步价格"刷新数据
-2. 检查 `price_sync.log` 查看同步状态
+2. 检查 `logs/price_sync.log` 查看同步状态
 3. 确认网络连接正常
 
 ### Q: 程序无法启动？
@@ -252,7 +186,7 @@ A:
 A:
 1. 确认是 Windows 10/11 64位系统
 2. 检查是否有杀毒软件拦截
-3. 查看 `app.log` 查看错误信息
+3. 查看 `logs/app.log` 查看错误信息
 
 ### Q: 如何在其他电脑使用？
 
@@ -260,39 +194,23 @@ A:
 1. 复制整个 `publish` 文件夹
 2. 粘贴到目标电脑
 3. 双击 `PoeAncientsPriceHelper.exe` 运行
-4. 如需 PaddleOCR，运行 `install_paddleocr.cmd`
-
-### Q: PaddleOCR 如何安装？
-
-A:
-1. 确保已安装 Python 3.8+
-2. 运行 `install_paddleocr.cmd`
-3. 在 AI 配置中启用 PaddleOCR
-4. 重启程序
-
-### Q: AI 识别如何配置？
-
-A:
-1. 点击 "AI 识别配置" 按钮
-2. 填写 API 端点、密钥、模型
-3. 点击 "测试 AI 识别" 验证
-4. 保存并重启程序
 
 ---
 
 ## 中英文映射表
 
-软件内置 183+ 个物品的中英文映射，包括：
+软件内置 928 个物品的中英文映射，数据来源：PoE2_Ninja_CN
 
-| 中文 | 英文 |
-|------|------|
-| 神圣石 | Divine Orb |
-| 崇高石 | Exalted Orb |
-| 混沌石 | Chaos Orb |
-| 符文合金 | Runic Alloy |
-| 适性合金 | Adaptive Alloy |
-| 防护合金 | Protective Alloy |
-| ... | ... |
+| 简体中文 | 繁体中文 | 英文 |
+|----------|----------|------|
+| 神圣石 | 神聖石 | Divine Orb |
+| 崇高石 | 崇高石 | Exalted Orb |
+| 混沌石 | 混沌石 | Chaos Orb |
+| 符文合金 | 符文合金 | Runic Alloy |
+| 氣旋合金 | 飓风合金 | Cyclonic Alloy |
+| 煥彩合金 | 棱镜合金 | Prismatic Alloy |
+| 秘能合金 | 神秘合金 | Mystic Alloy |
+| ... | ... | ... |
 
 完整映射请查看 `item_names_cn.json`
 
@@ -302,8 +220,7 @@ A:
 
 - **语言**: C# / .NET 8
 - **UI框架**: WPF + WinForms
-- **OCR引擎**: Tesseract / PaddleOCR
-- **AI识别**: OpenAI 兼容协议
+- **OCR引擎**: RapidOCR (PaddleOCR 模型) + Tesseract
 - **价格数据**: poe.ninja API
 
 ---
@@ -313,7 +230,9 @@ A:
 - [pedro-quiterio](https://github.com/pedro-quiterio) - 原作者
 - [poe.ninja](https://poe.ninja) - 价格数据
 - [Tesseract](https://github.com/tesseract-ocr/tesseract) - OCR引擎
-- [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) - 中文OCR引擎
+- [RapidOCR](https://github.com/RapidAI/RapidOCR) - 中文OCR引擎
+- [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) - OCR模型
+- [PoE2_Ninja_CN](https://github.com/richardchien/poe-ninja-cn) - 中文翻译数据
 
 ---
 
@@ -328,4 +247,4 @@ A:
 ## 支持
 
 如有问题或建议，请提交 Issue：
-https://github.com/XXOO140/poe2-/issues
+https://github.com/XXOO140/poe2-111/issues
